@@ -45,11 +45,18 @@ void conectarWifi() {
           Serial.print(".");
       }
       Serial.println("\nWiFi conectado");
-      Serial.print("IP del servidor web: ");
-      Serial.println(WiFi.localIP());
-      Serial.print("URL de la página: http://");
-      Serial.print(WiFi.localIP());
-      Serial.println("/");
+
+      // Mostrar la IP correctamente
+      IPAddress ip = WiFi.localIP();
+      if (ip) { // Validar si la IP es válida
+          Serial.print("IP del servidor web: ");
+          Serial.println(ip);
+          Serial.print("URL de la página: http://");
+          Serial.print(ip);
+          Serial.println("/");
+      } else {
+          Serial.println("No se pudo obtener la IP.");
+      }
   }
 }
 
@@ -192,6 +199,7 @@ void mostrarPaginaWeb(WiFiClient& client) {
         String pulsaciones = feed["field4"].as<String>();
         String fechaRegistro = feed["created_at"].as<String>();
 
+
         // Construir el contenido HTML con los datos extraídos
         contenidoHTML = "<h1>Datos obtenidos de ThingSpeak</h1>";
         contenidoHTML += "<p><strong>Nombre del Canal:</strong> " + canalNombre + "</p>";
@@ -204,6 +212,7 @@ void mostrarPaginaWeb(WiFiClient& client) {
         contenidoHTML += "<li><strong>Pulsaciones del Boton:</strong> " + pulsaciones + "</li>";
         contenidoHTML += "<li><strong>Fecha de Registro:</strong> " + fechaRegistro + "</li>";
         contenidoHTML += "</ul>";
+        
     }
 
     // Enviar la página al cliente
@@ -221,7 +230,7 @@ void mostrarPaginaWeb(WiFiClient& client) {
     client.println(".container { max-width: 800px; margin: 30px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }");
     client.println("h1 { color: #0078a0; text-align: center; }");
     client.println("h2 { color: #005f7a; margin-top: 20px; }");
-    client.println("ul { display: flex; gap: 10px; list-style: none; padding: 0; }");
+    client.println("ul { display: flex; flex-direction: column; gap: 10px; list-style: none; padding: 0; }");
     client.println("li { background: #f0f8fc; margin: 10px 0; padding: 10px; border-left: 5px solid #0078a0; border-radius: 4px; }");
     client.println("strong { color: #005f7a; }");
     client.println(".error { color: #d9534f; font-weight: bold; }");
@@ -235,6 +244,29 @@ void mostrarPaginaWeb(WiFiClient& client) {
     client.println("</html>");
 
     client.println();
+}
+
+String ajustarHorario(String fechaUTC) {
+    // Verificar que el formato tenga longitud válida
+    if (fechaUTC.length() < 20) {
+        return "Fecha inválida";
+    }
+
+    // Extraer la parte de la hora (HH)
+    int horaUTC = fechaUTC.substring(11, 13).toInt();
+    int horaCordoba = horaUTC - 3; // Ajustar a UTC-3
+
+    // Manejar desbordamiento de horas
+    if (horaCordoba < 0) {
+        horaCordoba += 24;
+    }
+
+    // Reemplazar la hora en la cadena original
+    String fechaAjustada = fechaUTC;
+    String nuevaHora = (horaCordoba < 10) ? "0" + String(horaCordoba) : String(horaCordoba);
+    fechaAjustada.replace(fechaUTC.substring(11, 13), nuevaHora);
+
+    return fechaAjustada;
 }
 
 
