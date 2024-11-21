@@ -4,11 +4,11 @@
 const int LED1 = 23;
 
 //Credenciales red Wifi
-const char *ssid = "Redmi11";
-const char *password = "esp32000";
+const char *ssid = "";
+const char *password = "";
 
 //Telegram BOT Token
-const String botToken = "7729772647:AAErwcz7tKA1EL3b9bSuGoInb0A1le4jqww";
+const String botToken = "";
 //const unsigned long tiempo = 1000; //tiempo medio entre mensajes de escaneo
 const unsigned long botMTBS = 1000;  //mean time between scan messages
 unsigned long botLastScan;
